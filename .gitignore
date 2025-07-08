@@ -146,3 +146,4 @@ playwright-report/
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+backend/ai-settings.json

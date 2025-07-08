@@ -5,6 +5,7 @@ import multipart from '@fastify/multipart'
 import { resumeRoutes } from './routes/resumes'
 import { opportunityRoutes } from './routes/opportunities'
 import { llmRoutes } from './routes/llm'
+import settingsRoutes, { initializeAIProvider } from './routes/settings'
 import { promises as fs } from 'fs'
 import path from 'path'
 
@@ -16,6 +17,9 @@ async function start() {
   try {
     await fs.mkdir('./uploads', { recursive: true })
 
+    // Initialize AI provider from saved settings
+    await initializeAIProvider()
+
     await fastify.register(cors, {
       origin: true,
     })
@@ -25,6 +29,7 @@ async function start() {
     await fastify.register(resumeRoutes, { prefix: '/api/resumes' })
     await fastify.register(opportunityRoutes, { prefix: '/api/opportunities' })
     await fastify.register(llmRoutes, { prefix: '/api/llm' })
+    await fastify.register(settingsRoutes, { prefix: '/api' })
 
     fastify.get('/health', async () => {
       return { status: 'ok', timestamp: new Date().toISOString() }

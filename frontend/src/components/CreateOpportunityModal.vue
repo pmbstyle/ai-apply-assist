@@ -199,7 +199,10 @@
               </button>
             </div>
 
-            <div v-if="showResumeComparison" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              v-if="showResumeComparison"
+              class="grid grid-cols-1 md:grid-cols-2 gap-4"
+            >
               <div>
                 <h5 class="font-semibold text-sm mb-2">Original Resume</h5>
                 <textarea

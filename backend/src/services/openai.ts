@@ -65,6 +65,7 @@ export async function optimizeResume(
     6. If the candidate is a frontend developer, don't add backend skills unless they already show backend experience
     7. Enhance existing descriptions to emphasize relevance to the target role
     8. Keep all personal information, contact details, and dates exactly as they are
+    9. Do not add any summary or conclusion paragraphs, return only the optimized resume
     
     Original Resume:
     ${resumeText}
