@@ -73,30 +73,21 @@
     <CreateOpportunityModal
       v-if="showCreateModal"
       :preselected-resume="selectedResumeForNewOpportunity"
-      @close="
-        showCreateModal = false
-        selectedResumeForNewOpportunity = null
-      "
+      @close="showCreateModal = false; selectedResumeForNewOpportunity = null"
       @created="handleOpportunityCreated"
     />
 
     <EditOpportunityModal
       v-if="showEditModal && editingOpportunity"
       :opportunity="editingOpportunity"
-      @close="
-        showEditModal = false
-        editingOpportunity = null
-      "
+      @close="showEditModal = false;editingOpportunity = null"
       @updated="handleOpportunityUpdated"
     />
 
     <ResumeViewModal
       v-if="showResumeModal && viewingResumeFile"
       :resume="viewingResumeFile"
-      @close="
-        showResumeModal = false
-        viewingResumeFile = null
-      "
+      @close="showResumeModal = false; viewingResumeFile = null"
       @updated="handleResumeUpdated"
     />
 
