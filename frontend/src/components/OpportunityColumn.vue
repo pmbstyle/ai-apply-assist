@@ -16,7 +16,7 @@
         :key="opportunity.id"
         :opportunity="opportunity"
         @edit="$emit('edit', opportunity)"
-        @delete="$emit('delete', $1)"
+        @delete="$emit('delete', $event)"
         @view-resume="$emit('viewResume', opportunity)"
       />
 

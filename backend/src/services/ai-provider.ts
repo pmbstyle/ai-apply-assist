@@ -46,6 +46,8 @@ function removeThinkingContent(text: string): string {
   let cleanText = text
     .replace(/<think>[\s\S]*?<\/think>/gi, '')
     .replace(/<think>[\s\S]*$/gi, '')
+    .replace(/```plaintext\n?/gi, '')
+    .replace(/```\n?/gi, '')
     .trim()
 
   if (!cleanText) {

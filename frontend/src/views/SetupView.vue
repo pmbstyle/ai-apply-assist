@@ -1,26 +1,41 @@
 <template>
   <div class="min-h-screen bg-base-100 p-4">
     <div class="max-w-4xl mx-auto">
-      <div class="text-center mb-8">
-        <img
-          src="/logo.png"
-          alt="AI Apply Assistant Logo"
-          class="w-64 mx-auto mb-4"
-        />
-        <p class="text-base-content/70">
-          Configure your AI provider to get started
-        </p>
+      <div class="flex justify-between items-center mb-8">
+        <div class="text-center flex-1">
+          <img
+            src="/logo.png"
+            alt="AI Apply Assistant Logo"
+            class="w-64 mx-auto mb-4"
+          />
+          <p class="text-base-content/70">
+            Configure your AI provider to get started
+          </p>
+        </div>
+        <button
+          @click="router.push('/')"
+          class="btn btn-outline btn-sm"
+          v-if="settingsStore.settings != null"
+        >
+          <svg
+            class="w-4 h-4 mr-2"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          Back to Home
+        </button>
       </div>
 
       <div class="card bg-base-200 shadow-xl">
         <div class="card-body">
-          <button
-            @click="router.push('/')"
-            class="btn btn-sm btn-ghost"
-            v-if="settingsStore.settings != null"
-          >
-            Back to Home
-          </button>
           <div class="form-control mb-6">
             <label class="label">
               <span class="label-text text-lg font-semibold">AI Provider</span>

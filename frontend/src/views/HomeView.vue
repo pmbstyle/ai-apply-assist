@@ -6,8 +6,24 @@
       </div>
       <div class="flex-none">
         <ul class="menu menu-horizontal px-1">
-          <li><a @click="currentView = 'resumes'">Resumes</a></li>
-          <li><a @click="currentView = 'opportunities'">Opportunities</a></li>
+          <li>
+            <a 
+              @click="currentView = 'resumes'"
+              :class="{ 'active': currentView === 'resumes' }"
+              class="mr-2"
+            >
+              Resumes
+            </a>
+          </li>
+          <li>
+            <a 
+              @click="currentView = 'opportunities'"
+              :class="{ 'active': currentView === 'opportunities' }"
+              class="mr-2"
+            >
+              Opportunities
+            </a>
+          </li>
           <li>
             <button @click="openSettings" class="btn btn-ghost btn-sm">
               <svg

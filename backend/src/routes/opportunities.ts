@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify'
 import { z } from 'zod'
 import { db } from '../models/database'
 import { opportunities, resumes, NewOpportunity } from '../models/schema'
-import { extractSkills, optimizeResume } from '../services/openai'
+import { getAIProvider } from '../services/ai-provider'
 import { eq } from 'drizzle-orm'
 
 const createOpportunitySchema = z.object({
@@ -45,8 +45,9 @@ export async function opportunityRoutes(fastify: FastifyInstance) {
         return reply.code(404).send({ error: 'Resume not found' })
       }
 
-      const skills = await extractSkills(body.jobDescription)
-      const optimizedResumeText = await optimizeResume(
+      const aiProvider = getAIProvider()
+      const skills = await aiProvider.extractSkills(body.jobDescription)
+      const optimizedResumeText = await aiProvider.optimizeResume(
         resume.originalText,
         body.jobDescription,
         skills

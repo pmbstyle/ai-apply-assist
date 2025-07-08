@@ -1,6 +1,6 @@
 <template>
   <div class="modal modal-open">
-    <div class="modal-box w-11/12 max-w-5xl">
+    <div class="modal-box w-11/12 max-w-7xl max-h-screen">
       <div class="flex justify-between items-center mb-4">
         <h3 class="font-bold text-lg">Create New Opportunity</h3>
         <button @click="$emit('close')" class="btn btn-sm btn-circle btn-ghost">
@@ -199,27 +199,8 @@
               </button>
             </div>
 
-            <div
-              v-if="showResumeComparison"
-              class="grid grid-cols-1 md:grid-cols-2 gap-4"
-            >
-              <div>
-                <h5 class="font-semibold text-sm mb-2">Original Resume</h5>
-                <textarea
-                  :value="originalResumeText"
-                  class="textarea textarea-bordered h-40 text-xs w-full"
-                  readonly
-                ></textarea>
-              </div>
-
-              <div>
-                <h5 class="font-semibold text-sm mb-2">Optimized Resume</h5>
-                <textarea
-                  v-model="optimizedResume"
-                  class="textarea textarea-bordered h-40 text-xs w-full"
-                  placeholder="Optimized resume will appear here..."
-                ></textarea>
-              </div>
+            <div v-if="showResumeComparison">
+              <div v-html="diffHtml"></div>
             </div>
 
             <div v-else>
@@ -258,6 +239,8 @@ import { useResumeStore } from '@/stores/resumes'
 import { useOpportunityStore } from '@/stores/opportunities'
 import { llmApi } from '@/services/api'
 import type { Resume, ExtractedSkills } from '@/types'
+import { html } from 'diff2html'
+import * as Diff from 'diff'
 
 interface Props {
   preselectedResume?: Resume | null
@@ -299,6 +282,28 @@ const selectedResume = computed(() =>
 const originalResumeText = computed(
   () => selectedResume.value?.originalText || ''
 )
+
+const diffHtml = computed(() => {
+  if (!originalResumeText.value || !optimizedResume.value) {
+    return ''
+  }
+
+  const diff = Diff.createTwoFilesPatch(
+    'original.txt',
+    'optimized.txt',
+    originalResumeText.value,
+    optimizedResume.value,
+    'Original Resume',
+    'Optimized Resume'
+  )
+
+  return html(diff, {
+    drawFileList: false,
+    outputFormat: 'line-by-line',
+    colorScheme: 'auto',
+    renderNothingWhenEmpty: false,
+  })
+})
 
 const canProcessWithAI = computed(
   () => form.value.jobDescription.trim() && form.value.resumeId > 0
@@ -377,3 +382,18 @@ onMounted(() => {
   }
 })
 </script>
+
+<style>
+@import 'diff2html/bundles/css/diff2html.min.css';
+.d2h-file-diff {
+  max-width: 100%;
+  max-height: 550px;
+  overflow-y: auto;
+}
+.d2h-code-linenumber {
+  display: none;
+}
+.d2h-code-line {
+  padding-left: 2rem;
+}
+</style>
