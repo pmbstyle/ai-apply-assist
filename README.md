@@ -1,4 +1,5 @@
-# AI Apply Assistant
+![image](https://github.com/user-attachments/assets/6a96f685-1b4f-4abc-a22e-3ac9db83ed37)
+
 
 A full-stack web application that helps users track job applications and optimize their resumes using AI.
 
@@ -13,7 +14,7 @@ A full-stack web application that helps users track job applications and optimiz
   - **Custom APIs** (OpenAI-compatible endpoints)
 - 🎨 **Drag & Drop**: Move opportunities between stages with intuitive drag-and-drop
 - 📊 **Skills Analysis**: Automatically extract hard and soft skills from job descriptions
-- 🔍 **Resume Optimization Diff**: Side-by-side comparison showing exactly what was changed in optimized resumes
+- 🔍 **Resume Optimization Diff**: Line-by-line comparison showing exactly what was changed in optimized resumes
 - ⚙️ **Flexible Setup**: Configure AI providers through an intuitive settings interface
 - 💾 **Local Storage**: All data stored locally with SQLite
 
