@@ -5,6 +5,7 @@ export const resumes = sqliteTable('resumes', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   filename: text('filename').notNull(),
   originalText: text('original_text').notNull(),
+  originalMarkdown: text('original_markdown'),
   uploadedAt: text('uploaded_at').notNull(),
 })
 
@@ -26,6 +27,7 @@ export const opportunities = sqliteTable('opportunities', {
   resumeId: integer('resume_id').references(() => resumes.id),
   extractedSkills: text('extracted_skills'),
   optimizedResume: text('optimized_resume'),
+  resumeMarkdown: text('resume_markdown'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 })

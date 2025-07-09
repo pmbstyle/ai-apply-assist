@@ -71,8 +71,20 @@ export const useResumeStore = defineStore('resumes', () => {
     }
   }
 
-  const getResumeById = (id: number) => {
-    return resumes.value.find(r => r.id === id)
+  const getResumeById = async (id: number) => {
+    const cached = resumes.value.find(r => r.id === id)
+    if (cached) return cached
+
+    try {
+      const response = await fetch(`/api/resumes/${id}`)
+      if (!response.ok) throw new Error('Resume not found')
+      const resume = await response.json()
+      resumes.value.push(resume)
+      return resume
+    } catch (err) {
+      console.error('Error fetching resume:', err)
+      return null
+    }
   }
 
   return {

@@ -16,6 +16,18 @@ const router = createRouter({
       component: () => import('@/views/HomeView.vue'),
       meta: { requiresSetup: true },
     },
+    {
+      path: '/opportunity/:id',
+      name: 'OpportunityDetails',
+      component: () => import('@/views/OpportunityDetailsView.vue'),
+      meta: { requiresSetup: true },
+    },
+    {
+      path: '/opportunity/:id/edit',
+      name: 'OpportunityEdit',
+      component: () => import('@/views/OpportunityEditView.vue'),
+      meta: { requiresSetup: true },
+    },
   ],
 })
 

@@ -6,31 +6,6 @@
     <div class="card-body p-4">
       <div class="flex justify-between items-start mb-2">
         <h3 class="card-title text-lg">{{ opportunity.company }}</h3>
-        <div class="dropdown dropdown-end">
-          <div tabindex="0" role="button" class="btn btn-ghost btn-sm">
-            <svg
-              class="w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zM12 13a1 1 0 110-2 1 1 0 010 2zM12 20a1 1 0 110-2 1 1 0 010 2z"
-              />
-            </svg>
-          </div>
-          <ul
-            tabindex="0"
-            class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
-          >
-            <li><a @click="editOpportunity">Edit</a></li>
-            <li><a @click="viewOptimizedResume">View Resume</a></li>
-            <li><a @click="deleteOpportunity" class="text-error">Delete</a></li>
-          </ul>
-        </div>
       </div>
 
       <div class="space-y-2">
@@ -67,14 +42,12 @@
           <span class="text-xs text-base-content/50">
             {{ formatDate(opportunity.createdAt) }}
           </span>
-          <a
-            v-if="opportunity.url"
-            :href="opportunity.url"
-            target="_blank"
+          <router-link
+            :to="`/opportunity/${opportunity.id}`"
             class="btn btn-xs btn-outline"
           >
-            View Job
-          </a>
+            View Details
+          </router-link>
         </div>
       </div>
     </div>
@@ -105,27 +78,10 @@ const salaryDisplay = computed(() => {
 })
 
 const emit = defineEmits<{
-  edit: [opportunity: Opportunity]
-  delete: [id: number]
-  viewResume: [opportunity: Opportunity]
 }>()
 
 const formatDate = (dateString: string) => {
   return new Date(dateString).toLocaleDateString()
-}
-
-const editOpportunity = () => {
-  emit('edit', props.opportunity)
-}
-
-const deleteOpportunity = () => {
-  if (confirm('Are you sure you want to delete this opportunity?')) {
-    emit('delete', props.opportunity.id)
-  }
-}
-
-const viewOptimizedResume = () => {
-  emit('viewResume', props.opportunity)
 }
 </script>
 

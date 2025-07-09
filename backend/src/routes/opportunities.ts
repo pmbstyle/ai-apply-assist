@@ -5,6 +5,13 @@ import { opportunities, resumes, NewOpportunity } from '../models/schema'
 import { getAIProvider } from '../services/ai-provider'
 import { eq } from 'drizzle-orm'
 
+function convertTextToMarkdown(text: string): string {
+  return text
+    .replace(/^([A-Z][^a-z]*(?:\s+[A-Z][^a-z]*)*)\s*$/gm, '# $1')
+    .replace(/^(\s*)-\s+/gm, '- ')
+    .replace(/^(\s*)\d+\.\s+/gm, '$1- ')
+}
+
 const createOpportunitySchema = z.object({
   company: z.string(),
   position: z.string(),
@@ -30,6 +37,7 @@ const updateOpportunitySchema = z.object({
   optimizedResume: z.string().optional(),
   resumeId: z.number().optional(),
   extractedSkills: z.string().optional(),
+  resumeMarkdown: z.string().optional(),
 })
 
 export async function opportunityRoutes(fastify: FastifyInstance) {
@@ -65,6 +73,7 @@ export async function opportunityRoutes(fastify: FastifyInstance) {
         resumeId: body.resumeId,
         extractedSkills: JSON.stringify(skills),
         optimizedResume: optimizedResumeText,
+        resumeMarkdown: convertTextToMarkdown(optimizedResumeText),
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }

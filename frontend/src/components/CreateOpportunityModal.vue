@@ -149,7 +149,6 @@
         </div>
       </div>
 
-      <!-- Full-width sections below the two-column layout -->
       <div v-if="extractedSkills" class="mt-6">
         <div class="card bg-base-200">
           <div class="card-body">
@@ -235,6 +234,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useResumeStore } from '@/stores/resumes'
 import { useOpportunityStore } from '@/stores/opportunities'
 import { llmApi } from '@/services/api'
@@ -253,6 +253,7 @@ const emit = defineEmits<{
   created: []
 }>()
 
+const router = useRouter()
 const resumeStore = useResumeStore()
 const opportunityStore = useOpportunityStore()
 
@@ -350,7 +351,7 @@ const createOpportunity = async () => {
   error.value = null
 
   try {
-    await opportunityStore.createOpportunity({
+    const newOpportunity = await opportunityStore.createOpportunity({
       company: form.value.company,
       position: form.value.position,
       jobDescription: form.value.jobDescription,
@@ -364,6 +365,8 @@ const createOpportunity = async () => {
 
     emit('created')
     emit('close')
+
+    router.push(`/opportunity/${newOpportunity.id}`)
   } catch (err) {
     error.value =
       err instanceof Error ? err.message : 'Failed to create opportunity'
