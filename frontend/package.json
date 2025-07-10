@@ -9,6 +9,11 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@tiptap/extension-color": "^2.25.1",
+    "@tiptap/extension-link": "^2.25.1",
+    "@tiptap/extension-text-style": "^2.25.1",
+    "@tiptap/starter-kit": "^2.25.0",
+    "@tiptap/vue-3": "^2.25.0",
     "@vueuse/core": "^13.5.0",
     "axios": "^1.6.0",
     "daisyui": "^4.4.19",

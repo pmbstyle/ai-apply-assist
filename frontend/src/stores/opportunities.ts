@@ -98,12 +98,34 @@ export const useOpportunityStore = defineStore('opportunities', () => {
     return opportunities.value.find(opp => opp.id === id)
   }
 
+  const fetchOpportunityById = async (id: number) => {
+    loading.value = true
+    error.value = null
+    try {
+      const opportunity = await opportunityApi.getById(id)
+      const index = opportunities.value.findIndex(opp => opp.id === id)
+      if (index !== -1) {
+        opportunities.value[index] = opportunity
+      } else {
+        opportunities.value.push(opportunity)
+      }
+      return opportunity
+    } catch (err) {
+      error.value =
+        err instanceof Error ? err.message : 'Failed to fetch opportunity'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     opportunities,
     opportunitiesByStatus,
     loading,
     error,
     fetchOpportunities,
+    fetchOpportunityById,
     createOpportunity,
     updateOpportunity,
     deleteOpportunity,

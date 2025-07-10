@@ -4,13 +4,7 @@ import { db } from '../models/database'
 import { opportunities, resumes, NewOpportunity } from '../models/schema'
 import { getAIProvider } from '../services/ai-provider'
 import { eq } from 'drizzle-orm'
-
-function convertTextToMarkdown(text: string): string {
-  return text
-    .replace(/^([A-Z][^a-z]*(?:\s+[A-Z][^a-z]*)*)\s*$/gm, '# $1')
-    .replace(/^(\s*)-\s+/gm, '- ')
-    .replace(/^(\s*)\d+\.\s+/gm, '$1- ')
-}
+import { convertMarkdownToText } from '../utils/markdownConverter'
 
 const createOpportunitySchema = z.object({
   company: z.string(),
@@ -55,8 +49,8 @@ export async function opportunityRoutes(fastify: FastifyInstance) {
 
       const aiProvider = getAIProvider()
       const skills = await aiProvider.extractSkills(body.jobDescription)
-      const optimizedResumeText = await aiProvider.optimizeResume(
-        resume.originalText,
+      const optimizedResumeMarkdown = await aiProvider.optimizeResume(
+        resume.originalMarkdown || resume.originalText,
         body.jobDescription,
         skills
       )
@@ -72,8 +66,8 @@ export async function opportunityRoutes(fastify: FastifyInstance) {
         notes: body.notes,
         resumeId: body.resumeId,
         extractedSkills: JSON.stringify(skills),
-        optimizedResume: optimizedResumeText,
-        resumeMarkdown: convertTextToMarkdown(optimizedResumeText),
+        optimizedResume: convertMarkdownToText(optimizedResumeMarkdown),
+        resumeMarkdown: optimizedResumeMarkdown,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }

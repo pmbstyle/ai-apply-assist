@@ -6,6 +6,7 @@ import { parsePDF, parseText } from '../services/pdf'
 import { eq } from 'drizzle-orm'
 import path from 'path'
 import { promises as fs } from 'fs'
+import { getAIProvider } from '../services/ai-provider'
 
 const createResumeSchema = z.object({
   filename: z.string(),
@@ -43,9 +44,13 @@ export async function resumeRoutes(fastify: FastifyInstance) {
         text = await parseText(filepath)
       }
 
+      const aiProvider = getAIProvider()
+      const originalMarkdown = await aiProvider.convertToMarkdown(text)
+
       const newResume: NewResume = {
         filename: data.filename,
         originalText: text,
+        originalMarkdown,
         uploadedAt: new Date().toISOString(),
       }
 

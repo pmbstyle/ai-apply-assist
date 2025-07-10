@@ -121,7 +121,7 @@
                     <button
                       @click="showDiff = !showDiff"
                       class="btn btn-outline btn-sm"
-                      :disabled="!originalResumeText"
+                      :disabled="!originalResumeText && !editableResumeMarkdown"
                     >
                       {{ showDiff ? 'Hide Diff' : 'Show Diff' }}
                     </button>
@@ -142,7 +142,7 @@
             </div>
 
             <div
-              v-if="showDiff && originalResumeText"
+              v-if="showDiff && (originalResumeText || editableResumeMarkdown)"
               class="card bg-base-200 shadow-lg"
             >
               <div class="card-body">
@@ -208,89 +208,10 @@
                   </div>
                 </div>
 
-                <div v-if="editorMode === 'edit'" class="space-y-2">
-                  <div class="flex flex-wrap gap-2 p-2 bg-base-300 rounded-lg">
-                    <button
-                      @click="applyFormat('bold')"
-                      class="btn btn-sm btn-outline"
-                      title="Bold"
-                    >
-                      <strong>B</strong>
-                    </button>
-                    <button
-                      @click="applyFormat('italic')"
-                      class="btn btn-sm btn-outline"
-                      title="Italic"
-                    >
-                      <em>I</em>
-                    </button>
-                    <button
-                      @click="applyFormat('underline')"
-                      class="btn btn-sm btn-outline"
-                      title="Underline"
-                    >
-                      <u>U</u>
-                    </button>
-                    <div class="divider divider-horizontal"></div>
-                    <button
-                      @click="applyFormat('heading1')"
-                      class="btn btn-sm btn-outline"
-                      title="Heading 1"
-                    >
-                      H1
-                    </button>
-                    <button
-                      @click="applyFormat('heading2')"
-                      class="btn btn-sm btn-outline"
-                      title="Heading 2"
-                    >
-                      H2
-                    </button>
-                    <button
-                      @click="applyFormat('heading3')"
-                      class="btn btn-sm btn-outline"
-                      title="Heading 3"
-                    >
-                      H3
-                    </button>
-                    <div class="divider divider-horizontal"></div>
-                    <button
-                      @click="applyFormat('bullet')"
-                      class="btn btn-sm btn-outline"
-                      title="Bullet List"
-                    >
-                      •
-                    </button>
-                    <button
-                      @click="applyFormat('link')"
-                      class="btn btn-sm btn-outline"
-                      title="Link"
-                    >
-                      🔗
-                    </button>
-                  </div>
-
-                  <textarea
-                    ref="textareaRef"
-                    v-model="editableResumeMarkdown"
-                    class="textarea textarea-bordered w-full font-mono text-sm resize-none"
-                    style="height: calc(100vh - 400px); min-height: 400px"
-                    placeholder="Resume content..."
-                    @keydown="handleKeyDown"
-                  ></textarea>
-                </div>
-
-                <div v-else class="prose max-w-none">
-                  <div
-                    class="border rounded-lg p-6 bg-white text-sm shadow-inner overflow-auto"
-                    style="height: calc(100vh - 400px); min-height: 400px"
-                  >
-                    <div
-                      v-html="renderedMarkdown"
-                      class="resume-content-preview"
-                    ></div>
-                  </div>
-                </div>
+                <MarkdownEditor
+                  v-model="editableResumeMarkdown"
+                  :editable="editorMode === 'edit'"
+                />
               </div>
             </div>
           </div>
@@ -310,6 +231,8 @@ import type { Opportunity } from '@/types'
 import { html } from 'diff2html'
 import * as Diff from 'diff'
 import { marked } from 'marked'
+import MarkdownEditor from '@/components/MarkdownEditor.vue'
+import { markdownToText } from '@/utils/markdown'
 
 const route = useRoute()
 const router = useRouter()
@@ -326,7 +249,6 @@ const showDiff = ref(false)
 const regenerating = ref(false)
 const saving = ref(false)
 const editorMode = ref<'edit' | 'preview'>('preview')
-const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
 const statusBadgeClass = computed(() => {
   const status = opportunity.value?.status
@@ -379,15 +301,18 @@ const renderedMarkdown = computed(() => {
 })
 
 const diffHtml = computed(() => {
-  if (!originalResumeText.value || !editableResume.value) return ''
+  if (!editableResumeMarkdown.value) return ''
+
+  const currentText = markdownToText(editableResumeMarkdown.value)
+  const originalText = originalResumeText.value || ''
 
   const diff = Diff.createTwoFilesPatch(
     'original.txt',
     'optimized.txt',
-    originalResumeText.value,
-    editableResume.value,
-    'Original Resume',
-    'Optimized Resume'
+    originalText,
+    currentText,
+    originalText ? 'Original Resume' : 'Empty',
+    'Current Resume'
   )
 
   return html(diff, {
@@ -404,13 +329,7 @@ const fetchOpportunity = async () => {
     error.value = null
 
     const id = parseInt(route.params.id as string)
-    const response = await fetch(`/api/opportunities/${id}`)
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch opportunity')
-    }
-
-    opportunity.value = await response.json()
+    opportunity.value = await opportunityStore.fetchOpportunityById(id)
     editableResume.value = opportunity.value?.optimizedResume || ''
     editableResumeMarkdown.value =
       opportunity.value?.resumeMarkdown ||
@@ -457,17 +376,9 @@ const convertTextToMarkdown = (text: string): string => {
     .replace(/^(\s*)\d+\.\s+/gm, '$1- ')
 }
 
-const convertMarkdownToText = (markdown: string): string => {
-  return markdown
-    .replace(/^#+\s+/gm, '')
-    .replace(/\*\*(.*?)\*\*/g, '$1')
-    .replace(/\*(.*?)\*/g, '$1')
-    .replace(/^-\s+/gm, '• ')
-}
-
 const toggleEditorMode = () => {
   if (editorMode.value === 'edit') {
-    editableResume.value = convertMarkdownToText(editableResumeMarkdown.value)
+    editableResume.value = markdownToText(editableResumeMarkdown.value)
     editorMode.value = 'preview'
   } else {
     editorMode.value = 'edit'
@@ -479,25 +390,15 @@ const saveResume = async () => {
 
   saving.value = true
   try {
-    const plainTextResume = convertMarkdownToText(editableResumeMarkdown.value)
+    const plainTextResume = markdownToText(editableResumeMarkdown.value)
 
-    const response = await fetch(`/api/opportunities/${opportunity.value.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+    opportunity.value = await opportunityStore.updateOpportunity(
+      opportunity.value.id,
+      {
         optimizedResume: plainTextResume,
         resumeMarkdown: editableResumeMarkdown.value,
-        updatedAt: new Date().toISOString(),
-      }),
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to save resume')
-    }
-
-    opportunity.value = await response.json()
+      }
+    )
     editableResume.value = plainTextResume
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Failed to save resume'
@@ -507,7 +408,7 @@ const saveResume = async () => {
 }
 
 const exportResume = async (format: 'txt' | 'pdf' | 'docx') => {
-  const content = convertMarkdownToText(editableResumeMarkdown.value)
+  const content = markdownToText(editableResumeMarkdown.value)
   const filename = `${opportunity.value?.company}_${opportunity.value?.position}_resume.${format}`
 
   if (format === 'txt') {
@@ -945,88 +846,6 @@ const openJobUrl = () => {
   }
 }
 
-const applyFormat = (format: string) => {
-  const textarea = textareaRef.value
-  if (!textarea) return
-
-  const start = textarea.selectionStart
-  const end = textarea.selectionEnd
-  const selectedText = editableResumeMarkdown.value.substring(start, end)
-  const beforeText = editableResumeMarkdown.value.substring(0, start)
-  const afterText = editableResumeMarkdown.value.substring(end)
-
-  let newText = ''
-  let newCursorPos = start
-
-  switch (format) {
-    case 'bold':
-      newText = `**${selectedText}**`
-      newCursorPos = selectedText ? end + 4 : start + 2
-      break
-    case 'italic':
-      newText = `*${selectedText}*`
-      newCursorPos = selectedText ? end + 2 : start + 1
-      break
-    case 'underline':
-      newText = `<u>${selectedText}</u>`
-      newCursorPos = selectedText ? end + 7 : start + 3
-      break
-    case 'heading1':
-      newText = `# ${selectedText}`
-      newCursorPos = selectedText ? end + 2 : start + 2
-      break
-    case 'heading2':
-      newText = `## ${selectedText}`
-      newCursorPos = selectedText ? end + 3 : start + 3
-      break
-    case 'heading3':
-      newText = `### ${selectedText}`
-      newCursorPos = selectedText ? end + 4 : start + 4
-      break
-    case 'bullet':
-      const lines = selectedText.split('\n')
-      newText = lines.map(line => (line.trim() ? `- ${line}` : line)).join('\n')
-      newCursorPos = end + lines.length * 2
-      break
-    case 'link':
-      const url = selectedText.startsWith('http') ? selectedText : 'https://'
-      const linkText = selectedText.startsWith('http')
-        ? 'Link Text'
-        : selectedText || 'Link Text'
-      newText = `[${linkText}](${url})`
-      newCursorPos = end + 4 + url.length
-      break
-    default:
-      newText = selectedText
-  }
-
-  editableResumeMarkdown.value = beforeText + newText + afterText
-
-  setTimeout(() => {
-    textarea.focus()
-    textarea.setSelectionRange(newCursorPos, newCursorPos)
-  }, 0)
-}
-
-const handleKeyDown = (event: KeyboardEvent) => {
-  if (event.ctrlKey || event.metaKey) {
-    switch (event.key) {
-      case 'b':
-        event.preventDefault()
-        applyFormat('bold')
-        break
-      case 'i':
-        event.preventDefault()
-        applyFormat('italic')
-        break
-      case 'u':
-        event.preventDefault()
-        applyFormat('underline')
-        break
-    }
-  }
-}
-
 const deleteOpportunity = async () => {
   if (!opportunity.value) return
 
@@ -1039,14 +858,7 @@ const deleteOpportunity = async () => {
   }
 
   try {
-    const response = await fetch(`/api/opportunities/${opportunity.value.id}`, {
-      method: 'DELETE',
-    })
-
-    if (!response.ok) {
-      throw new Error('Failed to delete opportunity')
-    }
-
+    await opportunityStore.deleteOpportunity(opportunity.value.id)
     router.push('/')
   } catch (err) {
     error.value =
