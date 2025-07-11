@@ -1,5 +1,6 @@
 ![image](https://github.com/user-attachments/assets/6a96f685-1b4f-4abc-a22e-3ac9db83ed37)
 
+# Work In Progress 🏗️
 
 A full-stack web application that helps users track job applications and optimize their resumes using AI.
 
