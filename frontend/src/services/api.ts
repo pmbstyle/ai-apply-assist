@@ -2,6 +2,7 @@ import axios from 'axios'
 import type {
   Resume,
   Opportunity,
+  Interview,
   CreateOpportunityRequest,
   UpdateOpportunityRequest,
   ExtractedSkills,
@@ -68,6 +69,32 @@ export const opportunityApi = {
 
   async delete(id: number): Promise<void> {
     await api.delete(`/opportunities/${id}`)
+  },
+}
+
+export const interviewApi = {
+  async getByOpportunityId(opportunityId: number): Promise<Interview[]> {
+    const { data } = await api.get(`/opportunities/${opportunityId}/interviews`)
+    return data
+  },
+
+  async create(interview: Omit<Interview, 'id' | 'createdAt'>): Promise<Interview> {
+    const { data } = await api.post('/interviews', interview)
+    return data
+  },
+
+  async getById(id: number): Promise<Interview> {
+    const { data } = await api.get(`/interviews/${id}`)
+    return data
+  },
+
+  async update(id: number, interview: Partial<Omit<Interview, 'id' | 'opportunityId' | 'createdAt'>>): Promise<Interview> {
+    const { data } = await api.put(`/interviews/${id}`, interview)
+    return data
+  },
+
+  async delete(id: number): Promise<void> {
+    await api.delete(`/interviews/${id}`)
   },
 }
 

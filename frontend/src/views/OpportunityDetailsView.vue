@@ -17,92 +17,28 @@
       </div>
 
       <div v-else-if="opportunity" class="space-y-6">
-        <div class="card bg-base-200 shadow-lg">
-          <div class="card-body">
-            <div class="flex justify-between items-start">
-              <div>
-                <h1 class="text-3xl font-bold">{{ opportunity.company }}</h1>
-                <h2 class="text-xl text-primary mt-1">
-                  {{ opportunity.position }}
-                </h2>
-                <div class="flex items-center gap-4 mt-2">
-                  <span class="badge badge-lg" :class="statusBadgeClass">
-                    {{ opportunity.status }}
-                  </span>
-                  <span v-if="salaryDisplay" class="text-success font-semibold">
-                    {{ salaryDisplay }}
-                  </span>
-                </div>
-              </div>
-              <div class="flex gap-2">
-                <button
-                  v-if="opportunity.url"
-                  @click="openJobUrl"
-                  class="btn btn-outline btn-sm"
-                >
-                  View Job Posting
-                </button>
-                <button
-                  @click="router.push(`/opportunity/${opportunity.id}/edit`)"
-                  class="btn btn-outline btn-sm"
-                >
-                  Edit
-                </button>
-                <button @click="deleteOpportunity" class="btn btn-error btn-sm">
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <OpportunityHeader
+          :opportunity="opportunity"
+          @edit="router.push(`/opportunity/${opportunity.id}/edit`)"
+          @delete="deleteOpportunity"
+        />
 
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
           <div class="space-y-6">
-            <div class="card bg-base-200 shadow-lg">
-              <div class="card-body">
-                <h3 class="card-title">Job Description</h3>
-                <div class="prose max-w-none">
-                  <pre class="whitespace-pre-wrap text-sm">{{
-                    opportunity.jobDescription
-                  }}</pre>
-                </div>
-              </div>
-            </div>
+            <InterviewSection :opportunity-id="opportunity.id" />
 
-            <div
+            <SkillGapAnalysis
               v-if="opportunity.extractedSkills"
-              class="card bg-base-200 shadow-lg"
-            >
-              <div class="card-body">
-                <h3 class="card-title">Extracted Skills</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <h4 class="font-semibold text-sm mb-2">Hard Skills</h4>
-                    <div class="flex flex-wrap gap-1">
-                      <span
-                        v-for="skill in opportunity.extractedSkills.hardSkills"
-                        :key="skill"
-                        class="badge badge-primary badge-sm"
-                      >
-                        {{ skill }}
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 class="font-semibold text-sm mb-2">Soft Skills</h4>
-                    <div class="flex flex-wrap gap-1">
-                      <span
-                        v-for="skill in opportunity.extractedSkills.softSkills"
-                        :key="skill"
-                        class="badge badge-secondary badge-sm"
-                      >
-                        {{ skill }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+              :extracted-skills="opportunity.extractedSkills"
+              :resume-text="editableResumeMarkdown"
+            />
+
+            <JobDescriptionCard :job-description="opportunity.jobDescription" />
+
+            <ExtractedSkillsCard
+              :extracted-skills="opportunity.extractedSkills"
+              :resume-text="editableResumeMarkdown"
+            />
 
             <div v-if="opportunity.notes" class="card bg-base-200 shadow-lg">
               <div class="card-body">
@@ -112,108 +48,23 @@
             </div>
           </div>
 
-          <div class="space-y-6">
-            <div class="card bg-base-200 shadow-lg">
-              <div class="card-body">
-                <div class="flex justify-between items-center">
-                  <h3 class="card-title">Optimized Resume</h3>
-                  <div class="flex gap-2">
-                    <button
-                      @click="showDiff = !showDiff"
-                      class="btn btn-outline btn-sm"
-                      :disabled="!originalResumeText && !editableResumeMarkdown"
-                    >
-                      {{ showDiff ? 'Hide Diff' : 'Show Diff' }}
-                    </button>
-                    <button
-                      @click="regenerateResume"
-                      class="btn btn-primary btn-sm"
-                      :disabled="regenerating"
-                    >
-                      <span
-                        v-if="regenerating"
-                        class="loading loading-spinner loading-sm"
-                      ></span>
-                      Re-generate
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div
-              v-if="showDiff && (originalResumeText || editableResumeMarkdown)"
-              class="card bg-base-200 shadow-lg"
-            >
-              <div class="card-body">
-                <h4 class="font-semibold mb-4">Changes Made</h4>
-                <div class="diff-container" v-html="diffHtml"></div>
-              </div>
-            </div>
-
-            <div v-if="!showDiff" class="card bg-base-200 shadow-lg">
-              <div class="card-body">
-                <div class="flex justify-between items-center mb-4">
-                  <h4 class="font-semibold">Resume Content</h4>
-                  <div class="flex gap-2">
-                    <button
-                      @click="toggleEditorMode"
-                      class="btn btn-outline btn-sm"
-                    >
-                      {{ editorMode === 'edit' ? 'Preview' : 'Edit' }}
-                    </button>
-
-                    <div class="dropdown dropdown-end">
-                      <div
-                        tabindex="0"
-                        role="button"
-                        class="btn btn-outline btn-sm"
-                      >
-                        Download
-                        <svg
-                          class="w-4 h-4 ml-1"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M19 9l-7 7-7-7"
-                          ></path>
-                        </svg>
-                      </div>
-                      <ul
-                        tabindex="0"
-                        class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-32"
-                      >
-                        <li><a @click="exportResume('txt')">TXT</a></li>
-                        <li><a @click="exportResume('pdf')">PDF</a></li>
-                        <li><a @click="exportResume('docx')">DOCX</a></li>
-                      </ul>
-                    </div>
-
-                    <button
-                      @click="saveResume"
-                      class="btn btn-primary btn-sm"
-                      :disabled="saving"
-                    >
-                      <span
-                        v-if="saving"
-                        class="loading loading-spinner loading-sm"
-                      ></span>
-                      Save Changes
-                    </button>
-                  </div>
-                </div>
-
-                <MarkdownEditor
-                  v-model="editableResumeMarkdown"
-                  :editable="editorMode === 'edit'"
-                />
-              </div>
-            </div>
+          <div>
+            <ResumeEditorCard
+              :editable-resume-markdown="editableResumeMarkdown"
+              @update:editable-resume-markdown="editableResumeMarkdown = $event"
+              :original-resume-text="originalResumeText"
+              :show-diff="showDiff"
+              :diff-html="diffHtml"
+              :editor-mode="editorMode"
+              :regenerating="regenerating"
+              :saving="saving"
+              @toggle-diff="showDiff = !showDiff"
+              @regenerate="regenerateResume"
+              @toggle-editor-mode="toggleEditorMode"
+              @export="exportResume"
+              @save="saveResume"
+              @changes-applied="handleChangesApplied"
+            />
           </div>
         </div>
       </div>
@@ -231,7 +82,12 @@ import type { Opportunity } from '@/types'
 import { html } from 'diff2html'
 import * as Diff from 'diff'
 import { marked } from 'marked'
-import MarkdownEditor from '@/components/MarkdownEditor.vue'
+import OpportunityHeader from '@/components/OpportunityHeader.vue'
+import JobDescriptionCard from '@/components/JobDescriptionCard.vue'
+import ExtractedSkillsCard from '@/components/ExtractedSkillsCard.vue'
+import ResumeEditorCard from '@/components/ResumeEditorCard.vue'
+import InterviewSection from '@/components/InterviewSection.vue'
+import SkillGapAnalysis from '@/components/SkillGapAnalysis.vue'
 import { markdownToText } from '@/utils/markdown'
 
 const route = useRoute()
@@ -249,34 +105,6 @@ const showDiff = ref(false)
 const regenerating = ref(false)
 const saving = ref(false)
 const editorMode = ref<'edit' | 'preview'>('preview')
-
-const statusBadgeClass = computed(() => {
-  const status = opportunity.value?.status
-  switch (status) {
-    case 'applied':
-      return 'badge-info'
-    case 'interview':
-      return 'badge-warning'
-    case 'accepted':
-      return 'badge-success'
-    case 'rejected':
-      return 'badge-error'
-    default:
-      return 'badge-ghost'
-  }
-})
-
-const salaryDisplay = computed(() => {
-  if (!opportunity.value) return ''
-  if (opportunity.value.salaryNA) return 'Salary: N/A'
-  if (opportunity.value.salaryFrom && opportunity.value.salaryTo) {
-    return `$${opportunity.value.salaryFrom.toLocaleString()} - $${opportunity.value.salaryTo.toLocaleString()}`
-  }
-  if (opportunity.value.salaryFrom) {
-    return `$${opportunity.value.salaryFrom.toLocaleString()}+`
-  }
-  return ''
-})
 
 const renderedMarkdown = computed(() => {
   if (!editableResumeMarkdown.value) return ''
@@ -361,6 +189,7 @@ const regenerateResume = async () => {
     )
     editableResume.value = optimized
     editableResumeMarkdown.value = convertTextToMarkdown(optimized)
+    showDiff.value = false
   } catch (err) {
     error.value =
       err instanceof Error ? err.message : 'Failed to regenerate resume'
@@ -840,10 +669,9 @@ const exportResume = async (format: 'txt' | 'pdf' | 'docx') => {
   }
 }
 
-const openJobUrl = () => {
-  if (opportunity.value?.url) {
-    window.open(opportunity.value.url, '_blank')
-  }
+const handleChangesApplied = (appliedText: string) => {
+  editableResumeMarkdown.value = convertTextToMarkdown(appliedText)
+  editableResume.value = appliedText
 }
 
 const deleteOpportunity = async () => {
@@ -870,91 +698,3 @@ onMounted(() => {
   fetchOpportunity()
 })
 </script>
-
-<style>
-@import 'diff2html/bundles/css/diff2html.min.css';
-
-.diff-container {
-  max-height: 400px;
-  overflow-y: auto;
-}
-
-.d2h-file-diff {
-  max-width: 100%;
-}
-
-.d2h-code-linenumber {
-  display: none;
-}
-
-.d2h-code-line {
-  padding-left: 2rem;
-}
-
-.resume-content-preview {
-  font-family: Arial, sans-serif;
-  line-height: 1.6;
-  color: #000000;
-  background-color: #ffffff;
-}
-
-.resume-content-preview p {
-  margin-bottom: 0.5rem;
-  line-height: 1.6;
-}
-
-.resume-content-preview h1 {
-  font-size: 1.25rem;
-  font-weight: bold;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-  color: #000000;
-}
-
-.resume-content-preview h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  color: #000000;
-}
-
-.resume-content-preview h3 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  color: #000000;
-}
-
-.resume-content-preview ul,
-.resume-content-preview ol {
-  margin: 0.5rem 0;
-  padding-left: 1.5rem;
-  color: #000000;
-  list-style-type: disc;
-}
-
-.resume-content-preview li {
-  margin-bottom: 0.25rem;
-  color: #000000;
-  display: list-item;
-  list-style-type: disc;
-  list-style-position: outside;
-}
-
-.resume-content-preview strong {
-  font-weight: 600;
-  color: #000000;
-}
-
-.resume-content-preview em {
-  font-style: italic;
-  color: #000000;
-}
-
-.resume-content-preview a {
-  color: #0066cc;
-  text-decoration: underline;
-}
-</style>

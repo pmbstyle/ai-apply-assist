@@ -5,7 +5,8 @@ A full-stack web application that helps users track job applications and optimiz
 
 ## Features
 
-- 📄 **Resume Management**: Upload and manage PDF/text resumes with editing capabilities
+### Core Features
+- 📄 **Resume Management**: Upload and manage PDF/text resumes with rich markdown editing capabilities
 - 🎯 **Job Opportunity Tracking**: Track applications across 4 stages (Applied, Interview, Accepted, Rejected)
 - 🤖 **Multi-Provider AI Integration**: Support for multiple AI providers:
   - **OpenAI** (GPT-series models)
@@ -13,10 +14,31 @@ A full-stack web application that helps users track job applications and optimiz
   - **LM Studio** (Local inference server)
   - **Custom APIs** (OpenAI-compatible endpoints)
 - 🎨 **Drag & Drop**: Move opportunities between stages with intuitive drag-and-drop
-- 📊 **Skills Analysis**: Automatically extract hard and soft skills from job descriptions
-- 🔍 **Resume Optimization Diff**: Line-by-line comparison showing exactly what was changed in optimized resumes
-- ⚙️ **Flexible Setup**: Configure AI providers through an intuitive settings interface
 - 💾 **Local Storage**: All data stored locally with SQLite
+
+### Advanced Resume Features
+- ✨ **Rich Text Editor**: Markdown-based resume editing with live preview
+- 🔍 **Enhanced Diff System**: Granular word-level change detection with accept/reject functionality
+- 📝 **Change Management**: Accept or reject individual AI-suggested changes
+- 📤 **Multi-Format Export**: Export resumes as TXT, PDF, or DOCX
+
+### Skills & Analysis
+- 📊 **Skills Extraction**: Automatically extract hard and soft skills from job descriptions
+- 🎯 **Skill Gap Analysis**: Visual skill matching with percentage scores and recommendations
+- 📈 **Match Indicators**: Real-time skill matching against your resume content
+- 💡 **Smart Suggestions**: AI-powered recommendations for improving skill alignment
+
+### Interview Management
+- 📅 **Interview Tracking**: Complete CRUD operations for interview scheduling
+- ⏰ **Smart Scheduling**: Date/time management with relative date formatting
+- 📝 **Interview Notes**: Detailed notes and preparation tracking
+- 🔔 **Visual Indicators**: Upcoming/past interview status with color coding
+
+### User Experience
+- 🏗️ **Modular Architecture**: Clean, component-based interface
+- 📱 **Collapsible Sections**: Streamlined view with expandable content sections
+- ⚙️ **Flexible Setup**: Configure AI providers through an intuitive settings interface
+- 🎨 **Modern UI**: Tailwind CSS + DaisyUI with responsive design
 
 ## Tech Stack
 
@@ -31,7 +53,9 @@ A full-stack web application that helps users track job applications and optimiz
 - **State Management**: Pinia
 - **UI**: Tailwind CSS + DaisyUI
 - **Drag & Drop**: SortableJS
-- **Diff Visualization**: diff2html
+- **Rich Text**: Markdown editor with live preview
+- **Diff Visualization**: diff2html + diff-match-patch for granular changes
+- **Charts**: Radial progress indicators for skill matching
 
 ## Setup Instructions
 
@@ -87,13 +111,6 @@ npm run dev
 
 The frontend will be available at `http://localhost:5173`
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
 
 ## License
 
